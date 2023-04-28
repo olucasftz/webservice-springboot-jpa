@@ -12,6 +12,7 @@ import com.devsuperior.coursewebservice.repositories.UserRepository;
 import com.devsuperior.coursewebservice.services.exceptions.DatabaseException;
 import com.devsuperior.coursewebservice.services.exceptions.ResourceNotFoundException;
 
+
 @Service
 public class UserService {
 
@@ -44,9 +45,17 @@ public class UserService {
 	}
 	
 	public User update(Long id, User obj) {
-		User entity = repository.getReferenceById(id);
-		updateData(entity, obj);
-		return repository.save(entity);
+		try {
+			if(repository.existsById(id)) {
+				User entity = repository.getReferenceById(id);
+				updateData(entity, obj);
+				return repository.save(entity);
+			} else {
+				throw new ResourceNotFoundException(id);
+			}	
+		} catch (DataIntegrityViolationException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 
 	private void updateData(User entity, User obj) {
